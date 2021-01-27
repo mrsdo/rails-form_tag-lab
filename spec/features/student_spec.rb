@@ -1,3 +1,4 @@
+require 'byebug'
 require 'rails_helper'
 
 describe 'Route to view' do
@@ -14,24 +15,6 @@ describe 'Multiple students' do
 
     visit students_path
     expect(page).to have_content(/Daenerys|Lindsey/)
-  end
-end
-
-describe 'form page' do
-  it 'renders the form with the new action' do
-    visit new_student_path
-    expect(page).to have_content("Student Form")
-  end
-
-  it 'ensures that the new form submits content and renders form content' do
-    visit new_student_path
-
-    fill_in 'student[first_name]', with: "Margaery"
-    fill_in 'student[last_name]', with: "Tyrell"
-
-    click_on "Submit Student"
-
-    expect(page).to have_content("Margaery")
   end
 end
 
@@ -53,6 +36,43 @@ describe 'Show page' do
   it 'renders the last name in a h1 tag' do
     visit student_path(@student)
     expect(page).to have_css("h1", text: "Targaryen")
+  end
+
+  it 'renders the active status if the user is inactive' do
+    visit student_path(@student)
+    expect(page).to have_content("This student is currently inactive.")
+  end
+
+  it 'renders the active status if the user is active' do
+    @student.active = true
+    @student.save
+    visit student_path(@student)
+    expect(page).to have_content("This student is currently active.")
+  end
+end
+
+describe 'Activate page' do
+  before do
+    @student = Student.create!(first_name: "Daenerys", last_name: "Targaryen")
+  end
+
+  it "Should mark an inactive student as active" do
+    visit activate_student_path(@student)
+    @student.reload
+    expect(@student.active).to eq(true)
+  end
+
+  it "Should mark an active student as inactive" do
+    @student.active = true
+    @student.save
+    visit activate_student_path(@student)
+    @student.reload
+    expect(@student.active).to eq(false)
+  end
+
+  it "Should redirect to the student show page" do
+    visit activate_student_path(@student)
+    expect(page.current_path).to eq(student_path(@student))
   end
 end
 
