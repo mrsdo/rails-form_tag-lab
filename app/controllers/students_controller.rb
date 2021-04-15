@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class StudentsController < ApplicationController
   before_action :set_student, only: :show
-  
+
   def index
     @students = Student.all
   end
@@ -18,7 +20,7 @@ class StudentsController < ApplicationController
 
   private
 
-    def set_student
-      @student = Student.find(params[:id])
-    end
+  def set_student
+    @student = Student.find(params[:id])
+  end
 end
